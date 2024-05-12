@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function RegisterForm() {
@@ -9,31 +10,50 @@ export default function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-const handleSubmit = async (e)=>{
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(!name || !email || !password){
-        setError("Please Enter all requied fields")
+    if (!name || !email || !password) {
+      setError("Please Enter all requied fields");
+      return;
     }
 
     try {
-       const res = await fetch('api/register' ,{
-            method:'POST',
-            headers:{
-                'content-Type': 'application/json'
-            },
-            body: JSON.stringify({name,email,password})
-        })
+      const resUserExists = await fetch("api/userExist", {
+        method: "POST",
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-        if (res.ok) {
-            console.log(' Registration successful');
-            
-        }
+      const { user } = await resUserExists.json();
+
+      if (user) {
+        setError("User already exists");
+        return;
+      }
+
+      const res = await fetch("api/register", {
+        method: "POST",
+        headers: {
+          "content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (res.ok) {
+        const form = e.target;
+        console.log("Registration successful");
+        form.reset();
+        router.push("/");
+      }
     } catch (error) {
-        console.log(' Registration Failed', error);
+      console.log(" Registration Failed", error);
     }
-
-};
+  };
 
   console.log(name);
 
@@ -43,10 +63,26 @@ const handleSubmit = async (e)=>{
         <div className="shadow-lg p-5 rounded-lg border-t-4 border-green-400">
           <h1 className="text-xl font-bold my-4">Register</h1>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3" action="">
-            <input onChange={(e) => setName(e.target.value)} type="text" placeholder="Full Name" />
-            <input onChange={(e) => setEmail(e.target.value)}  type="text" placeholder="Email" />
-            <input onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" />
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-3"
+            action=""
+          >
+            <input
+              onChange={(e) => setName(e.target.value)}
+              type="text"
+              placeholder="Full Name"
+            />
+            <input
+              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Email"
+            />
+            <input
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="Password"
+            />
             <button
               className="bg-green-600 text-white font-bold cursor-pointer px-6 py-2"
               type="submit"

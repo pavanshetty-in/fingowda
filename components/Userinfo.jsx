@@ -1,3 +1,5 @@
+import { signOut } from "next-auth/react";
+
 export default function Userinfo() {
   return (
     <div className="grid place-content-center h-screen">
@@ -8,7 +10,7 @@ export default function Userinfo() {
         <div>
           Email: <span className="font-bold">Abc</span>
         </div>
-        <button className="bg-red-500 text-white font-bold px-6 py-2 mt-3">
+        <button onClick={()=> signOut()} className="bg-red-500 text-white font-bold px-6 py-2 mt-3">
           Log out
         </button>
       </div>
